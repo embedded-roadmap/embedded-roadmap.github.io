@@ -1,0 +1,1602 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #080c14;
+  --bg2: #0d1420;
+  --bg3: #111827;
+  --border: rgba(99,179,237,0.12);
+  --border2: rgba(99,179,237,0.22);
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --accent3: #34d399;
+  --accent4: #fb923c;
+  --accent5: #f472b6;
+  --gold: #fbbf24;
+  --red: #f87171;
+  --glow: rgba(56,189,248,0.15);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 14px;
+}
+
+.sr-only { position: absolute; left: -9999px; }
+
+/* ── SCANLINES ── */
+body::before {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none; z-index: 0;
+}
+
+.root { position: relative; z-index: 1; }
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 12px 20px;
+  background: rgba(8,12,20,0.95);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.logo-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; color: var(--accent3);
+  background: rgba(52,211,153,0.12);
+  border: 1px solid rgba(52,211,153,0.3);
+  padding: 2px 6px; border-radius: 3px;
+  letter-spacing: 1px;
+}
+
+.topbar-nav { display: flex; gap: 2px; margin-left: auto; }
+
+.nav-btn {
+  background: transparent; border: none; cursor: pointer;
+  color: var(--muted); font-family: 'DM Sans', sans-serif;
+  font-size: 12px; padding: 6px 12px; border-radius: 6px;
+  transition: all 0.2s; white-space: nowrap;
+}
+.nav-btn:hover { background: rgba(99,179,237,0.08); color: var(--text); }
+.nav-btn.active { background: rgba(56,189,248,0.12); color: var(--accent); border: 1px solid rgba(56,189,248,0.2); }
+
+.xp-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25);
+  padding: 5px 12px; border-radius: 20px;
+  font-family: 'Space Mono', monospace; font-size: 11px; color: var(--gold);
+  white-space: nowrap;
+}
+
+/* ── LAYOUT ── */
+.layout { display: flex; min-height: calc(100vh - 50px); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 12px 0;
+  overflow-y: auto;
+}
+
+.sidebar-section { padding: 4px 12px; margin-bottom: 4px; }
+.sidebar-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 1.5px;
+  color: var(--muted); padding: 8px 4px 4px;
+  text-transform: uppercase;
+}
+
+.branch-btn {
+  width: 100%; text-align: left; background: transparent;
+  border: none; cursor: pointer; padding: 7px 8px;
+  border-radius: 6px; font-family: 'DM Sans', sans-serif;
+  font-size: 12px; color: var(--muted);
+  transition: all 0.15s; display: flex; align-items: center; gap: 8px;
+}
+.branch-btn:hover { background: rgba(99,179,237,0.06); color: var(--text); }
+.branch-btn.active { background: rgba(56,189,248,0.1); color: var(--accent); }
+
+.branch-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+  background: var(--muted);
+}
+.branch-btn.active .branch-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+.branch-pct {
+  margin-left: auto; font-family: 'Space Mono', monospace;
+  font-size: 9px; color: var(--accent3);
+}
+
+/* ── MAIN ── */
+.main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* ── VIEWS ── */
+.view { display: none; flex: 1; overflow-y: auto; padding: 20px; }
+.view.active { display: block; }
+
+/* ── DASHBOARD ── */
+.dashboard-hero {
+  background: linear-gradient(135deg, rgba(56,189,248,0.08) 0%, rgba(129,140,248,0.06) 50%, rgba(251,191,36,0.04) 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px; margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+
+.dashboard-hero::before {
+  content: '';
+  position: absolute; top: -50%; right: -10%;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-rank {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  color: var(--accent3); letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.hero-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 28px; color: var(--text);
+  line-height: 1.1; margin-bottom: 8px;
+}
+
+.hero-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+.xp-bar-wrap {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+}
+.xp-bar-label { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); min-width: 60px; }
+.xp-bar-track {
+  flex: 1; height: 6px; background: rgba(255,255,255,0.05);
+  border-radius: 3px; overflow: hidden;
+}
+.xp-bar-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width 0.8s cubic-bezier(0.23,1,0.32,1);
+  box-shadow: 0 0 8px rgba(56,189,248,0.5);
+}
+.xp-bar-val { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--accent); min-width: 60px; text-align: right; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+
+.stat-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--border2); }
+.stat-card-label {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  letter-spacing: 1px; color: var(--muted); margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.stat-card-val {
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 22px; color: var(--text);
+}
+.stat-card-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.stat-card.accent-blue .stat-card-val { color: var(--accent); }
+.stat-card.accent-green .stat-card-val { color: var(--accent3); }
+.stat-card.accent-purple .stat-card-val { color: var(--accent2); }
+.stat-card.accent-gold .stat-card-val { color: var(--gold); }
+
+/* ── BRANCHES OVERVIEW GRID ── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: 16px; color: var(--text);
+}
+.section-tag {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  color: var(--muted); letter-spacing: 1px;
+}
+
+.branch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+
+.branch-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; cursor: pointer;
+  transition: all 0.2s; position: relative; overflow: hidden;
+}
+.branch-card:hover {
+  border-color: var(--border2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.branch-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--card-color, var(--accent));
+  opacity: 0.6;
+}
+
+.branch-card-icon {
+  font-size: 20px; margin-bottom: 8px;
+  display: block;
+}
+.branch-card-name {
+  font-family: 'Syne', sans-serif; font-weight: 600;
+  font-size: 13px; color: var(--text); margin-bottom: 4px;
+}
+.branch-card-topics { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+
+.mini-progress-track {
+  height: 3px; background: rgba(255,255,255,0.05);
+  border-radius: 2px; overflow: hidden;
+}
+.mini-progress-fill {
+  height: 100%; border-radius: 2px;
+  background: var(--card-color, var(--accent));
+  transition: width 0.6s;
+}
+.branch-card-pct {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+/* ── ROADMAP VIEW ── */
+.roadmap-header {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 20px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 16px;
+}
+.roadmap-branch-name {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px;
+}
+.roadmap-meta { margin-left: auto; text-align: right; }
+.roadmap-meta-stat { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); }
+
+.level-band {
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+.level-band-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; cursor: pointer;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.level-band-header:hover { background: rgba(99,179,237,0.05); }
+
+.level-badge {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  padding: 3px 8px; border-radius: 4px; letter-spacing: 1px;
+  font-weight: 700;
+}
+.lv1 { background: rgba(100,116,139,0.2); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+.lv2 { background: rgba(52,211,153,0.1); color: var(--accent3); border: 1px solid rgba(52,211,153,0.25); }
+.lv3 { background: rgba(56,189,248,0.1); color: var(--accent); border: 1px solid rgba(56,189,248,0.25); }
+.lv4 { background: rgba(129,140,248,0.1); color: var(--accent2); border: 1px solid rgba(129,140,248,0.25); }
+.lv5 { background: rgba(251,191,36,0.1); color: var(--gold); border: 1px solid rgba(251,191,36,0.25); }
+.lv6 { background: rgba(251,191,36,0.15); color: #fde68a; border: 1px solid rgba(251,191,36,0.35); }
+.lv7 { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+
+.level-title {
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+}
+.level-xp { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--gold); margin-left: auto; }
+.level-chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
+.level-band.open .level-chevron { transform: rotate(90deg); }
+
+.level-topics { padding: 0; display: none; }
+.level-band.open .level-topics { display: block; }
+
+.topic-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 80px 60px 60px 36px;
+  align-items: center; gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s; cursor: pointer;
+}
+.topic-row:last-child { border-bottom: none; }
+.topic-row:hover { background: rgba(56,189,248,0.04); }
+
+.topic-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+  font-size: 11px; color: transparent;
+}
+.topic-check.done {
+  background: var(--accent3); border-color: var(--accent3);
+  color: #fff; box-shadow: 0 0 8px rgba(52,211,153,0.4);
+}
+
+.topic-name {
+  font-size: 13px; color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+}
+.topic-name-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.diff-bar {
+  height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.05); position: relative;
+}
+.diff-fill {
+  position: absolute; top: 0; left: 0; height: 100%; border-radius: 2px;
+}
+
+.xp-tag {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  color: var(--gold); text-align: right;
+}
+.rarity-tag {
+  font-family: 'Space Mono', monospace; font-size: 9px; text-align: center;
+}
+.rarity-common { color: #94a3b8; }
+.rarity-rare { color: var(--accent); }
+.rarity-elite { color: var(--accent5); }
+
+.topic-info-btn {
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 4px; cursor: pointer; color: var(--muted);
+  width: 24px; height: 24px; font-size: 10px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.topic-info-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── TOPIC DETAIL PANEL ── */
+.detail-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7); z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.detail-overlay.hidden { display: none; }
+
+.detail-panel {
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 14px; width: 100%; max-width: 560px;
+  max-height: 80vh; overflow-y: auto;
+  padding: 24px; position: relative;
+}
+
+.detail-close {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--muted); cursor: pointer;
+  width: 28px; height: 28px; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.detail-close:hover { color: var(--text); }
+
+.detail-topic-name {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.detail-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.chip {
+  font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.5px;
+  padding: 3px 8px; border-radius: 4px; border: 1px solid;
+}
+.chip-blue { background: rgba(56,189,248,0.1); color: var(--accent); border-color: rgba(56,189,248,0.25); }
+.chip-green { background: rgba(52,211,153,0.1); color: var(--accent3); border-color: rgba(52,211,153,0.25); }
+.chip-purple { background: rgba(129,140,248,0.1); color: var(--accent2); border-color: rgba(129,140,248,0.25); }
+.chip-gold { background: rgba(251,191,36,0.1); color: var(--gold); border-color: rgba(251,191,36,0.25); }
+.chip-red { background: rgba(248,113,113,0.1); color: var(--red); border-color: rgba(248,113,113,0.25); }
+
+.detail-section-title {
+  font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1.5px;
+  color: var(--muted); text-transform: uppercase; margin-bottom: 8px; margin-top: 16px;
+}
+
+.detail-percentile {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 32px;
+  color: var(--accent3);
+}
+.detail-percentile-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.score-row { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+
+.score-item {
+  flex: 1; min-width: 80px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px;
+}
+.score-item-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.score-item-bar { height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
+.score-item-fill { height: 100%; border-radius: 2px; }
+.score-item-val { font-family: 'Space Mono', monospace; font-size: 10px; }
+
+.detail-resources { display: flex; flex-direction: column; gap: 6px; }
+.resource-item {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 6px; padding: 8px 10px;
+}
+.resource-type {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  padding: 2px 6px; border-radius: 3px; flex-shrink: 0;
+}
+.resource-name { font-size: 12px; color: var(--text); }
+
+.detail-mark-btn {
+  width: 100%; margin-top: 16px; padding: 12px;
+  border-radius: 8px; border: none; cursor: pointer;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+  transition: all 0.2s;
+}
+.detail-mark-btn.mark { background: linear-gradient(135deg, var(--accent3), #059669); color: #fff; }
+.detail-mark-btn.unmark { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+
+/* ── LEADERBOARD VIEW ── */
+.leaderboard-table {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+}
+.lb-row {
+  display: grid; grid-template-columns: 40px 1fr 80px 80px 60px;
+  align-items: center; gap: 12px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-row:hover { background: rgba(56,189,248,0.04); }
+.lb-row.header { background: rgba(255,255,255,0.02); }
+.lb-row.me { background: rgba(56,189,248,0.06); border-left: 2px solid var(--accent); }
+
+.lb-rank {
+  font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700;
+  text-align: center;
+}
+.rank-gold { color: var(--gold); }
+.rank-silver { color: #cbd5e1; }
+.rank-bronze { color: #b45309; }
+
+.lb-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700;
+  flex-shrink: 0;
+}
+
+.lb-user { display: flex; align-items: center; gap: 8px; }
+.lb-name { font-size: 13px; font-family: 'DM Sans', sans-serif; color: var(--text); }
+.lb-location { font-size: 11px; color: var(--muted); }
+
+.lb-xp { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--gold); text-align: right; }
+.lb-rank-title { font-size: 10px; color: var(--muted); text-align: right; }
+.lb-level {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  padding: 2px 6px; border-radius: 4px; text-align: center;
+}
+
+/* ── STATS VIEW ── */
+.radar-wrap {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+}
+.radar-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px;
+}
+.radar-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 12px; }
+
+.stat-compare {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+}
+.stat-compare-header {
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+}
+.stat-compare-row {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  display: grid; grid-template-columns: 1fr 60px 160px 60px;
+  align-items: center; gap: 12px;
+}
+.stat-compare-row:last-child { border-bottom: none; }
+.stat-topic { font-size: 12px; color: var(--text); }
+.stat-yours { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--accent3); text-align: right; }
+.stat-global { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); text-align: left; }
+.stat-pct-bar {
+  height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; position: relative;
+}
+.stat-pct-you { position: absolute; top: 0; left: 0; height: 100%; border-radius: 2px; background: var(--accent3); }
+.stat-pct-avg { position: absolute; top: 0; left: 0; height: 100%; border-radius: 2px; background: rgba(100,116,139,0.5); width: 40%; }
+
+/* ── BADGES ── */
+.badges-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+.badge-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; text-align: center;
+  transition: all 0.2s;
+}
+.badge-card.earned { border-color: rgba(251,191,36,0.3); }
+.badge-card.earned:hover { box-shadow: 0 0 20px rgba(251,191,36,0.1); }
+.badge-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+.badge-name { font-size: 11px; color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 500; }
+.badge-desc { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.badge-card.locked { opacity: 0.4; filter: grayscale(1); }
+
+/* ── RADAR SVG ── */
+.radar-svg { display: block; margin: 0 auto; }
+
+/* ── NOTIFICATION ── */
+.notif {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--bg2); border: 1px solid var(--accent3);
+  border-radius: 10px; padding: 12px 16px;
+  font-size: 13px; color: var(--text); z-index: 300;
+  transform: translateX(200%); transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+  max-width: 260px;
+}
+.notif.show { transform: translateX(0); }
+.notif-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: var(--accent3); margin-bottom: 2px; }
+
+</style>
+</head>
+<body>
+<h2 class="sr-only">Embedded Roadmap — Electronics and Embedded Systems Engineering Career Platform</h2>
+<div class="root">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">Embedded<span style="color:var(--accent2)">Roadmap</span></div>
+  <div class="logo-tag">BETA</div>
+  <div class="topbar-nav">
+    <button class="nav-btn active" onclick="switchView('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="switchView('roadmap')">Roadmap</button>
+    <button class="nav-btn" onclick="switchView('stats')">Global Stats</button>
+    <button class="nav-btn" onclick="switchView('leaderboard')">Leaderboard</button>
+    <button class="nav-btn" onclick="switchView('badges')">Badges</button>
+  </div>
+  <div class="xp-pill">⚡ 4,820 XP</div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Core Domains</div>
+      <button class="branch-btn active" onclick="selectBranch('embedded')">
+        <div class="branch-dot"></div>Embedded Systems<span class="branch-pct">34%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('firmware')">
+        <div class="branch-dot"></div>Firmware Eng.<span class="branch-pct">21%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('pcb')">
+        <div class="branch-dot"></div>PCB Design<span class="branch-pct">45%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('analog')">
+        <div class="branch-dot"></div>Analog Electronics<span class="branch-pct">28%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('digital')">
+        <div class="branch-dot"></div>Digital Electronics<span class="branch-pct">55%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('power')">
+        <div class="branch-dot"></div>Power Electronics<span class="branch-pct">12%</span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Specializations</div>
+      <button class="branch-btn" onclick="selectBranch('rf')">
+        <div class="branch-dot"></div>RF Engineering<span class="branch-pct">8%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('fpga')">
+        <div class="branch-dot"></div>FPGA Engineering<span class="branch-pct">15%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('asic')">
+        <div class="branch-dot"></div>ASIC Design<span class="branch-pct">3%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('dsp')">
+        <div class="branch-dot"></div>Signal Processing<span class="branch-pct">18%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('rtos')">
+        <div class="branch-dot"></div>Real-Time Systems<span class="branch-pct">22%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('iot')">
+        <div class="branch-dot"></div>IoT Engineering<span class="branch-pct">38%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('linux')">
+        <div class="branch-dot"></div>Embedded Linux<span class="branch-pct">25%</span>
+      </button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Industry</div>
+      <button class="branch-btn" onclick="selectBranch('auto')">
+        <div class="branch-dot"></div>Automotive<span class="branch-pct">10%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('medical')">
+        <div class="branch-dot"></div>Medical Electronics<span class="branch-pct">19%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('wearable')">
+        <div class="branch-dot"></div>Wearable Electronics<span class="branch-pct">41%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('bms')">
+        <div class="branch-dot"></div>Battery Management<span class="branch-pct">30%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('emc')">
+        <div class="branch-dot"></div>EMC/EMI Eng.<span class="branch-pct">7%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('safety')">
+        <div class="branch-dot"></div>Functional Safety<span class="branch-pct">5%</span>
+      </button>
+      <button class="branch-btn" onclick="selectBranch('edgeai')">
+        <div class="branch-dot"></div>Edge AI Systems<span class="branch-pct">22%</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ══ DASHBOARD VIEW ══ -->
+    <div class="view active" id="view-dashboard">
+      <div class="dashboard-hero">
+        <div class="hero-rank">STAFF ENGINEER PATH · ANALOG/MIXED-SIGNAL TRACK</div>
+        <div class="hero-title">Engineer<br>Civilization Map</div>
+        <div class="hero-subtitle">35 engineering domains · 1,240 topics · Your global percentile: <span style="color:var(--accent3)">top 6.2%</span></div>
+        <div class="xp-bar-wrap">
+          <div class="xp-bar-label">Staff Eng.</div>
+          <div class="xp-bar-track"><div class="xp-bar-fill" style="width:64%"></div></div>
+          <div class="xp-bar-val">4,820 / 7,500</div>
+        </div>
+        <div class="xp-bar-wrap">
+          <div class="xp-bar-label" style="font-size:9px;color:var(--muted)">Next: Lead</div>
+          <div class="xp-bar-track"><div class="xp-bar-fill" style="width:100%;background:linear-gradient(90deg,var(--accent3),#059669)"></div></div>
+          <div class="xp-bar-val" style="color:var(--accent3)">✓ UNLOCKED</div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card accent-blue">
+          <div class="stat-card-label">Topics Mastered</div>
+          <div class="stat-card-val">287</div>
+          <div class="stat-card-sub">of 1,240 total</div>
+        </div>
+        <div class="stat-card accent-green">
+          <div class="stat-card-label">Global Percentile</div>
+          <div class="stat-card-val">93.8%</div>
+          <div class="stat-card-sub">top 6.2% worldwide</div>
+        </div>
+        <div class="stat-card accent-purple">
+          <div class="stat-card-label">Rare Skills</div>
+          <div class="stat-card-val">14</div>
+          <div class="stat-card-sub">elite/uncommon topics</div>
+        </div>
+        <div class="stat-card accent-gold">
+          <div class="stat-card-label">Engineering XP</div>
+          <div class="stat-card-val">4,820</div>
+          <div class="stat-card-sub">Staff Engineer tier</div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">Engineering Branches</div>
+        <div class="section-tag">35 DOMAINS TOTAL</div>
+      </div>
+
+      <div class="branch-grid">
+        <div class="branch-card" style="--card-color:#38bdf8" onclick="selectBranch('embedded');switchView('roadmap')">
+          <span class="branch-card-icon">⚙️</span>
+          <div class="branch-card-name">Embedded Systems</div>
+          <div class="branch-card-topics">68 topics · Senior level</div>
+          <div class="mini-progress-track"><div class="mini-progress-fill" style="width:34%"></div></div>
+          <div class="branch-card-pct">34% complete</div>
+        </div>
+        <div class="branch-card" style="--card-color:#818cf8" onclick="selectBranch('pcb');switchView('roadmap')">
+          <span class="branch-card-icon">🔧</span>
+          <div class="branch-card-name">PCB Design</div>
+          <div class="branch-card-topics">52 topics · Lead level</div>
+          <div class="mini-progress-track"><div class="mini-progress-fill" style="width:45%"></div></div>
+          <div class="branch-card-pct">45% complete</div>
+        </div>
+        <div class="branch-card" style="--card-color:#34d399" onclick="selectBranch('analog');switchView('roadmap')">
+          <span class="branch-card-icon">📡</span>
+          <div class="branch-card-name">Analog Electronics</div>
+          <div class="branch-card-topics">74 topics · Staff level</div>
+          <div class="mini-progress-track"><div class="mini-progress-fill" style="width:28%"></div></div>
+          <div class="branch-card-pct">28% complete</div>
+        </div>
+        <div class="branch-card" style="--card-color:#fb923c" onclick="selectBranch('bms');switchView('roadmap')">
+          <span class="branch-card-icon">🔋</span>
+          <div class="branch-card-name">Battery Management</div>
+          <div class="branch-card-topics">38 topics · Senior level</div>
+          <div class="mini-progress-track"><div class="mini-progress-fill" style="width:30%"></div></div>
+          <div class="branch-card-pct">30% complete</div>
+        </div>
+        <div class="branch-card" style="--card-color:#f472b6" onclick="selectBranch('medical');switchView('roadmap')">
+          <span class="branch-card-icon">🏥</span>
+          <div class="branch-card-name">Medical Electronics</div>
+          <div class="branch-card-topics">61 topics · Senior level</div>
+          <div class="mini-progress-track"><div class="mini-progress-fill" style="width:19%"></div></div>
+          <div class="branch-card-pct">19% complete</div>
+        </div>
+        <div class="branch-card" style="--card-color:#fbbf24" onclick="selectBranch('edgeai');switchView('roadmap')">
+          <span class="branch-card-icon">🤖</span>
+          <div class="branch-card-name">Edge AI Systems</div>
+          <div class="branch-card-topics">44 topics · Mid level</div>
+          <div class="mini-progress-track"><div class="mini-progress-fill" style="width:22%"></div></div>
+          <div class="branch-card-pct">22% complete</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ROADMAP VIEW ══ -->
+    <div class="view" id="view-roadmap">
+      <div class="roadmap-header">
+        <span style="font-size:24px" id="roadmap-icon">⚙️</span>
+        <div>
+          <div class="roadmap-branch-name" id="roadmap-title">Embedded Systems Engineering</div>
+          <div style="font-size:12px;color:var(--muted)">Full career path · Intern → Distinguished Engineer</div>
+        </div>
+        <div class="roadmap-meta">
+          <div class="roadmap-meta-stat">23/68 topics mastered</div>
+          <div class="roadmap-meta-stat" style="color:var(--accent3)">Top 8% in this domain</div>
+        </div>
+      </div>
+
+      <!-- Level 1 -->
+      <div class="level-band open" id="band-1">
+        <div class="level-band-header" onclick="toggleBand(1)">
+          <div class="level-badge lv1">LV 1</div>
+          <div class="level-title">Intern Engineer</div>
+          <div style="font-size:11px;color:var(--muted);margin-left:8px">Entry requirements: basic electronics, programming</div>
+          <div class="level-xp">0 – 500 XP</div>
+          <div class="level-chevron">▶</div>
+        </div>
+        <div class="level-topics">
+          <div style="display:grid;grid-template-columns:36px 1fr 80px 60px 60px 36px;padding:8px 16px 4px;gap:10px;border-bottom:1px solid var(--border)">
+            <span></span>
+            <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">TOPIC</span>
+            <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">DIFFICULTY</span>
+            <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">XP</span>
+            <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">RARITY</span>
+            <span></span>
+          </div>
+          <div class="topic-row" onclick="openTopic('ohm')">
+            <div class="topic-check done" id="chk-ohm">✓</div>
+            <div><div class="topic-name">Ohm's Law & Kirchhoff's Laws</div><div class="topic-name-sub">V, I, R fundamentals · nodal/mesh analysis</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:15%;background:#34d399"></div></div></div>
+            <div class="xp-tag">+50 XP</div>
+            <div class="rarity-tag rarity-common">COMMON</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('ohm')">i</button>
+          </div>
+          <div class="topic-row" onclick="openTopic('components')">
+            <div class="topic-check done" id="chk-components">✓</div>
+            <div><div class="topic-name">Passive Components</div><div class="topic-name-sub">R, L, C behavior · datasheets · tolerances</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:20%;background:#34d399"></div></div></div>
+            <div class="xp-tag">+60 XP</div>
+            <div class="rarity-tag rarity-common">COMMON</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('components')">i</button>
+          </div>
+          <div class="topic-row" onclick="openTopic('mcu_basics')">
+            <div class="topic-check done" id="chk-mcu_basics">✓</div>
+            <div><div class="topic-name">Microcontroller Fundamentals</div><div class="topic-name-sub">GPIO, timers, interrupts · ATmega/STM32 intro</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:30%;background:#38bdf8"></div></div></div>
+            <div class="xp-tag">+80 XP</div>
+            <div class="rarity-tag rarity-common">COMMON</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('mcu_basics')">i</button>
+          </div>
+          <div class="topic-row" onclick="openTopic('c_embedded')">
+            <div class="topic-check" id="chk-c_embedded"></div>
+            <div><div class="topic-name">C for Embedded Systems</div><div class="topic-name-sub">Memory layout · volatile · bitfields · pointer arithmetic</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:35%;background:#38bdf8"></div></div></div>
+            <div class="xp-tag">+90 XP</div>
+            <div class="rarity-tag rarity-common">COMMON</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('c_embedded')">i</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level 2 -->
+      <div class="level-band open" id="band-2">
+        <div class="level-band-header" onclick="toggleBand(2)">
+          <div class="level-badge lv2">LV 2</div>
+          <div class="level-title">Junior Engineer</div>
+          <div style="font-size:11px;color:var(--muted);margin-left:8px">Threshold: 500 XP · 1–2 yrs experience</div>
+          <div class="level-xp">500 – 1,500 XP</div>
+          <div class="level-chevron">▶</div>
+        </div>
+        <div class="level-topics">
+          <div class="topic-row" onclick="openTopic('spi_i2c')">
+            <div class="topic-check done" id="chk-spi_i2c">✓</div>
+            <div><div class="topic-name">SPI / I2C / UART Protocols</div><div class="topic-name-sub">Timing diagrams · driver implementation · debugging</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:40%;background:#38bdf8"></div></div></div>
+            <div class="xp-tag">+110 XP</div>
+            <div class="rarity-tag rarity-common">COMMON</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('spi_i2c')">i</button>
+          </div>
+          <div class="topic-row" onclick="openTopic('rtos_intro')">
+            <div class="topic-check" id="chk-rtos_intro"></div>
+            <div><div class="topic-name">RTOS Fundamentals</div><div class="topic-name-sub">Tasks, queues, semaphores · FreeRTOS · context switching</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:55%;background:#818cf8"></div></div></div>
+            <div class="xp-tag">+150 XP</div>
+            <div class="rarity-tag rarity-rare">RARE</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('rtos_intro')">i</button>
+          </div>
+          <div class="topic-row" onclick="openTopic('power_basics')">
+            <div class="topic-check" id="chk-power_basics"></div>
+            <div><div class="topic-name">Power Supply Design Basics</div><div class="topic-name-sub">LDO vs SMPS · decoupling · power sequencing</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:45%;background:#38bdf8"></div></div></div>
+            <div class="xp-tag">+120 XP</div>
+            <div class="rarity-tag rarity-common">COMMON</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('power_basics')">i</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level 3 -->
+      <div class="level-band" id="band-3">
+        <div class="level-band-header" onclick="toggleBand(3)">
+          <div class="level-badge lv3">LV 3</div>
+          <div class="level-title">Mid-Level Engineer</div>
+          <div style="font-size:11px;color:var(--muted);margin-left:8px">Threshold: 1,500 XP · 2–5 yrs experience</div>
+          <div class="level-xp">1,500 – 3,000 XP</div>
+          <div class="level-chevron">▶</div>
+        </div>
+        <div class="level-topics">
+          <div class="topic-row" onclick="openTopic('dma')">
+            <div class="topic-check done" id="chk-dma">✓</div>
+            <div><div class="topic-name">DMA & Memory Architecture</div><div class="topic-name-sub">DMA controllers · cache coherency · MPU/MMU basics</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:60%;background:#818cf8"></div></div></div>
+            <div class="xp-tag">+180 XP</div>
+            <div class="rarity-tag rarity-rare">RARE</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('dma')">i</button>
+          </div>
+          <div class="topic-row" onclick="openTopic('bootloader')">
+            <div class="topic-check" id="chk-bootloader"></div>
+            <div><div class="topic-name">Bootloader Design</div><div class="topic-name-sub">Startup code · linker scripts · OTA update chains</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:65%;background:#818cf8"></div></div></div>
+            <div class="xp-tag">+200 XP</div>
+            <div class="rarity-tag rarity-rare">RARE</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('bootloader')">i</button>
+          </div>
+          <div class="topic-row" onclick="openTopic('analog_design')">
+            <div class="topic-check" id="chk-analog_design"></div>
+            <div><div class="topic-name">Analog Front-End Design</div><div class="topic-name-sub">Op-amp topologies · ADC/DAC interfacing · noise budget</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:70%;background:#fbbf24"></div></div></div>
+            <div class="xp-tag">+220 XP</div>
+            <div class="rarity-tag rarity-rare">RARE</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('analog_design')">i</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level 4 -->
+      <div class="level-band" id="band-4">
+        <div class="level-band-header" onclick="toggleBand(4)">
+          <div class="level-badge lv4">LV 4</div>
+          <div class="level-title">Senior Engineer</div>
+          <div style="font-size:11px;color:var(--muted);margin-left:8px">Threshold: 3,000 XP · 5–8 yrs</div>
+          <div class="level-xp">3,000 – 5,500 XP</div>
+          <div class="level-chevron">▶</div>
+        </div>
+        <div class="level-topics">
+          <div class="topic-row" onclick="openTopic('rtos_kernel')">
+            <div class="topic-check" id="chk-rtos_kernel"></div>
+            <div><div class="topic-name">RTOS Kernel Internals</div><div class="topic-name-sub">Scheduler implementation · tickless mode · port layer</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:78%;background:#f472b6"></div></div></div>
+            <div class="xp-tag">+280 XP</div>
+            <div class="rarity-tag rarity-elite" style="color:#f472b6">ELITE</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('rtos_kernel')">i</button>
+          </div>
+          <div class="topic-row" onclick="openTopic('mixed_signal')">
+            <div class="topic-check" id="chk-mixed_signal"></div>
+            <div><div class="topic-name">Mixed-Signal IC Design</div><div class="topic-name-sub">PVT corners · mismatch · phase margin · Cadence/Spectre</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:85%;background:#f87171"></div></div></div>
+            <div class="xp-tag">+320 XP</div>
+            <div class="rarity-tag rarity-elite" style="color:#f87171">ELITE</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('mixed_signal')">i</button>
+          </div>
+          <div class="topic-row" onclick="openTopic('hv_design')">
+            <div class="topic-check done" id="chk-hv_design">✓</div>
+            <div><div class="topic-name">High-Voltage Design (≥1kV)</div><div class="topic-name-sub">Creepage · clearance · HiPot · isolation design · 10kV+</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:90%;background:#f87171"></div></div></div>
+            <div class="xp-tag">+380 XP</div>
+            <div class="rarity-tag rarity-elite" style="color:#f87171">ELITE ★</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('hv_design')">i</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level 5 -->
+      <div class="level-band" id="band-5">
+        <div class="level-band-header" onclick="toggleBand(5)">
+          <div class="level-badge lv5">LV 5</div>
+          <div class="level-title">Lead Engineer</div>
+          <div style="font-size:11px;color:var(--muted);margin-left:8px">Threshold: 5,500 XP · 8–12 yrs</div>
+          <div class="level-xp">5,500 – 8,000 XP</div>
+          <div class="level-chevron">▶</div>
+        </div>
+        <div class="level-topics">
+          <div class="topic-row" onclick="openTopic('timing_closure')">
+            <div class="topic-check" id="chk-timing_closure"></div>
+            <div><div class="topic-name">FPGA Timing Closure</div><div class="topic-name-sub">STA · setup/hold · multi-cycle paths · floorplanning</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:92%;background:#f87171"></div></div></div>
+            <div class="xp-tag">+420 XP</div>
+            <div class="rarity-tag rarity-elite" style="color:#f87171">ELITE</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('timing_closure')">i</button>
+          </div>
+          <div class="topic-row" onclick="openTopic('ddr_si')">
+            <div class="topic-check" id="chk-ddr_si"></div>
+            <div><div class="topic-name">DDR Signal Integrity</div><div class="topic-name-sub">Impedance control · eye diagrams · IBIS models · 2.5D stack</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:96%;background:#f87171"></div></div></div>
+            <div class="xp-tag">+500 XP</div>
+            <div class="rarity-tag rarity-elite" style="color:#f87171">ELITE ★★</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('ddr_si')">i</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level 6 & 7 collapsed -->
+      <div class="level-band" id="band-6">
+        <div class="level-band-header" onclick="toggleBand(6)">
+          <div class="level-badge lv6">LV 6</div>
+          <div class="level-title">Staff Engineer</div>
+          <div style="font-size:11px;color:var(--muted);margin-left:8px">Threshold: 8,000 XP · 12–18 yrs · Currently pursuing</div>
+          <div class="level-xp">8,000 – 12,000 XP</div>
+          <div class="level-chevron">▶</div>
+        </div>
+        <div class="level-topics">
+          <div class="topic-row" onclick="openTopic('asic_flow')">
+            <div class="topic-check" id="chk-asic_flow"></div>
+            <div><div class="topic-name">Full ASIC Design Flow</div><div class="topic-name-sub">RTL → synthesis → P&R → tape-out · DRC/LVS</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:99%;background:#f87171"></div></div></div>
+            <div class="xp-tag">+600 XP</div>
+            <div class="rarity-tag rarity-elite" style="color:#f87171">ELITE ★★★</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('asic_flow')">i</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-band" id="band-7">
+        <div class="level-band-header" onclick="toggleBand(7)">
+          <div class="level-badge lv7">LV 7</div>
+          <div class="level-title">Distinguished Engineer</div>
+          <div style="font-size:11px;color:var(--muted);margin-left:8px">Threshold: 12,000 XP · 20+ yrs · Industry legend</div>
+          <div class="level-xp">12,000+ XP</div>
+          <div class="level-chevron">▶</div>
+        </div>
+        <div class="level-topics">
+          <div class="topic-row" onclick="openTopic('node_physics')">
+            <div class="topic-check" id="chk-node_physics"></div>
+            <div><div class="topic-name">Sub-7nm Process Physics</div><div class="topic-name-sub">FinFET · GAA transistors · quantum tunneling · EUV lithography</div></div>
+            <div><div class="diff-bar"><div class="diff-fill" style="width:100%;background:linear-gradient(90deg,#f87171,#f472b6)"></div></div></div>
+            <div class="xp-tag" style="color:#f472b6">+800 XP</div>
+            <div class="rarity-tag" style="color:#f472b6">LEGEND</div>
+            <button class="topic-info-btn" onclick="event.stopPropagation();openTopic('node_physics')">i</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STATS VIEW ══ -->
+    <div class="view" id="view-stats">
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title">Global Knowledge Comparison</div>
+        <div class="section-tag">vs. ~4.2M EMBEDDED ENGINEERS</div>
+      </div>
+
+      <div class="stat-grid" style="margin-bottom:20px">
+        <div class="stat-card accent-green">
+          <div class="stat-card-label">Your Percentile</div>
+          <div class="stat-card-val">93.8%</div>
+          <div class="stat-card-sub">top 6.2% globally</div>
+        </div>
+        <div class="stat-card accent-purple">
+          <div class="stat-card-label">Rare Topics</div>
+          <div class="stat-card-val">14</div>
+          <div class="stat-card-sub">known by &lt;5% of engineers</div>
+        </div>
+        <div class="stat-card accent-blue">
+          <div class="stat-card-label">Domain Breadth</div>
+          <div class="stat-card-val">23/35</div>
+          <div class="stat-card-sub">branches touched</div>
+        </div>
+        <div class="stat-card accent-gold">
+          <div class="stat-card-label">Specialization</div>
+          <div class="stat-card-val">HV/AFE</div>
+          <div class="stat-card-sub">top 1.2% in domain</div>
+        </div>
+      </div>
+
+      <div class="radar-wrap">
+        <div class="radar-card">
+          <div class="radar-title">Skill Radar</div>
+          <canvas id="radarChart" width="240" height="220" role="img" aria-label="Skill radar chart showing proficiency across 6 engineering domains"></canvas>
+        </div>
+        <div class="radar-card">
+          <div class="radar-title">XP Growth — Last 6 Months</div>
+          <canvas id="xpChart" width="240" height="220" role="img" aria-label="Line chart showing XP growth over 6 months from 1200 to 4820"></canvas>
+        </div>
+      </div>
+
+      <div class="stat-compare">
+        <div class="stat-compare-header">Topic Rarity Analysis</div>
+        <div style="display:grid;grid-template-columns:1fr 60px 160px 60px;padding:8px 16px 4px;gap:12px;border-bottom:1px solid var(--border)">
+          <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">TOPIC</span>
+          <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">YOURS</span>
+          <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">GLOBAL AVERAGE</span>
+          <span style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">PCTL</span>
+        </div>
+        <div class="stat-compare-row">
+          <div class="stat-topic">High Voltage Design (&gt;1kV)</div>
+          <div class="stat-yours">✓</div>
+          <div><div class="stat-pct-bar"><div class="stat-pct-avg"></div><div class="stat-pct-you" style="width:98%;opacity:0.3;background:var(--accent3)"></div></div><div style="font-size:10px;color:var(--muted);margin-top:2px">1.8% know this</div></div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent3)">98.2%</div>
+        </div>
+        <div class="stat-compare-row">
+          <div class="stat-topic">DDR Signal Integrity</div>
+          <div class="stat-yours" style="color:var(--muted)">✗</div>
+          <div><div class="stat-pct-bar"><div class="stat-pct-avg"></div></div><div style="font-size:10px;color:var(--muted);margin-top:2px">1.3% know this</div></div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">—</div>
+        </div>
+        <div class="stat-compare-row">
+          <div class="stat-topic">RTOS Kernel Development</div>
+          <div class="stat-yours" style="color:var(--muted)">✗</div>
+          <div><div class="stat-pct-bar"><div class="stat-pct-avg"></div></div><div style="font-size:10px;color:var(--muted);margin-top:2px">4.2% know this</div></div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">—</div>
+        </div>
+        <div class="stat-compare-row">
+          <div class="stat-topic">SPI / I2C / UART Protocols</div>
+          <div class="stat-yours">✓</div>
+          <div><div class="stat-pct-bar"><div class="stat-pct-avg" style="width:72%"></div><div class="stat-pct-you" style="width:72%;opacity:0.3;background:var(--muted)"></div></div><div style="font-size:10px;color:var(--muted);margin-top:2px">72% know this</div></div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--accent)">72%</div>
+        </div>
+        <div class="stat-compare-row">
+          <div class="stat-topic">Analog Front-End Design</div>
+          <div class="stat-yours" style="color:var(--muted)">✗</div>
+          <div><div class="stat-pct-bar"><div class="stat-pct-avg" style="width:18%"></div></div><div style="font-size:10px;color:var(--muted);margin-top:2px">18% know this</div></div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">—</div>
+        </div>
+        <div class="stat-compare-row">
+          <div class="stat-topic">Mixed-Signal IC Design (ADI-level)</div>
+          <div class="stat-yours" style="color:var(--muted)">✗</div>
+          <div><div class="stat-pct-bar"><div class="stat-pct-avg" style="width:2.5%"></div></div><div style="font-size:10px;color:var(--muted);margin-top:2px">2.5% know this</div></div>
+          <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ LEADERBOARD VIEW ══ -->
+    <div class="view" id="view-leaderboard">
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title">Monthly Leaderboard</div>
+        <div class="section-tag">MAY 2026 · GLOBAL</div>
+      </div>
+
+      <div class="stat-grid" style="margin-bottom:16px">
+        <div class="stat-card accent-gold">
+          <div class="stat-card-label">Your Rank</div>
+          <div class="stat-card-val">#312</div>
+          <div class="stat-card-sub">of 48,294 users</div>
+        </div>
+        <div class="stat-card accent-purple">
+          <div class="stat-card-label">Rare Skills</div>
+          <div class="stat-card-val">#89</div>
+          <div class="stat-card-sub">rare topic holders</div>
+        </div>
+        <div class="stat-card accent-blue">
+          <div class="stat-card-label">This Month XP</div>
+          <div class="stat-card-val">+820</div>
+          <div class="stat-card-sub">vs avg 340 XP/mo</div>
+        </div>
+        <div class="stat-card accent-green">
+          <div class="stat-card-label">Consistency</div>
+          <div class="stat-card-val">14 day</div>
+          <div class="stat-card-sub">active streak</div>
+        </div>
+      </div>
+
+      <div class="leaderboard-table">
+        <div class="lb-row header">
+          <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;text-align:center">#</div>
+          <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace">ENGINEER</div>
+          <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;text-align:right">TOTAL XP</div>
+          <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;text-align:right">RANK</div>
+          <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;text-align:center">LEVEL</div>
+        </div>
+        <div class="lb-row">
+          <div class="lb-rank rank-gold">1</div>
+          <div class="lb-user"><div class="lb-avatar" style="background:rgba(251,191,36,0.15);color:var(--gold)">AK</div><div><div class="lb-name">A. Krishnamurthy</div><div class="lb-location">Bangalore, IN · ASIC/SoC</div></div></div>
+          <div class="lb-xp">31,840 XP</div>
+          <div class="lb-rank-title">Distinguished</div>
+          <div class="lb-level lv7" style="font-size:9px;padding:2px 6px;border-radius:4px;text-align:center">LV 7</div>
+        </div>
+        <div class="lb-row">
+          <div class="lb-rank rank-silver">2</div>
+          <div class="lb-user"><div class="lb-avatar" style="background:rgba(129,140,248,0.15);color:var(--accent2)">MH</div><div><div class="lb-name">M. Hoffmann</div><div class="lb-location">Munich, DE · RF / mmWave</div></div></div>
+          <div class="lb-xp">28,200 XP</div>
+          <div class="lb-rank-title">Distinguished</div>
+          <div class="lb-level lv7" style="font-size:9px;padding:2px 6px;border-radius:4px;text-align:center">LV 7</div>
+        </div>
+        <div class="lb-row">
+          <div class="lb-rank rank-bronze">3</div>
+          <div class="lb-user"><div class="lb-avatar" style="background:rgba(52,211,153,0.15);color:var(--accent3)">YT</div><div><div class="lb-name">Y. Takahashi</div><div class="lb-location">Tokyo, JP · Power / BMS</div></div></div>
+          <div class="lb-xp">24,550 XP</div>
+          <div class="lb-rank-title">Staff Eng.</div>
+          <div class="lb-level lv6" style="font-size:9px;padding:2px 6px;border-radius:4px;text-align:center">LV 6</div>
+        </div>
+        <div class="lb-row" style="opacity:0.6">
+          <div class="lb-rank" style="color:var(--muted)">…</div>
+          <div class="lb-user"><div style="font-size:12px;color:var(--muted)">309 engineers between...</div></div>
+          <div></div><div></div><div></div>
+        </div>
+        <div class="lb-row me">
+          <div class="lb-rank" style="color:var(--accent)">312</div>
+          <div class="lb-user"><div class="lb-avatar" style="background:rgba(56,189,248,0.15);color:var(--accent)">ZK</div><div><div class="lb-name">You (Z. Koçak) ← YOU</div><div class="lb-location">Istanbul, TR · HW/Analog · Livewell</div></div></div>
+          <div class="lb-xp">4,820 XP</div>
+          <div class="lb-rank-title">Staff path</div>
+          <div class="lb-level lv5" style="font-size:9px;padding:2px 6px;border-radius:4px;text-align:center">LV 5</div>
+        </div>
+        <div class="lb-row">
+          <div class="lb-rank" style="color:var(--muted)">313</div>
+          <div class="lb-user"><div class="lb-avatar" style="background:rgba(248,113,113,0.15);color:var(--red)">LP</div><div><div class="lb-name">L. Petrova</div><div class="lb-location">Moscow, RU · Embedded Linux</div></div></div>
+          <div class="lb-xp">4,790 XP</div>
+          <div class="lb-rank-title">Lead Eng.</div>
+          <div class="lb-level lv5" style="font-size:9px;padding:2px 6px;border-radius:4px;text-align:center">LV 5</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BADGES VIEW ══ -->
+    <div class="view" id="view-badges">
+      <div class="section-header" style="margin-bottom:16px">
+        <div class="section-title">Engineering Badges</div>
+        <div class="section-tag">14 / 88 EARNED</div>
+      </div>
+      <div class="badges-grid">
+        <div class="badge-card earned"><span class="badge-icon">⚡</span><div class="badge-name">High Voltage Master</div><div class="badge-desc">10kV design · top 2%</div></div>
+        <div class="badge-card earned"><span class="badge-icon">🔋</span><div class="badge-name">BMS Specialist</div><div class="badge-desc">Battery management expert</div></div>
+        <div class="badge-card earned"><span class="badge-icon">🩺</span><div class="badge-name">Medical Grade</div><div class="badge-desc">MDR / IEC 60601 certified</div></div>
+        <div class="badge-card earned"><span class="badge-icon">📶</span><div class="badge-name">Protocol Polyglot</div><div class="badge-desc">SPI·I2C·UART·BLE·CAN</div></div>
+        <div class="badge-card earned"><span class="badge-icon">🌊</span><div class="badge-name">Analog Surfer</div><div class="badge-desc">Op-amp topology mastery</div></div>
+        <div class="badge-card earned"><span class="badge-icon">⌚</span><div class="badge-name">Wearable Pioneer</div><div class="badge-desc">Smart device specialist</div></div>
+        <div class="badge-card locked"><span class="badge-icon">🔬</span><div class="badge-name">IC Architect</div><div class="badge-desc">Mixed-signal IC design</div></div>
+        <div class="badge-card locked"><span class="badge-icon">🖥️</span><div class="badge-name">Silicon Wizard</div><div class="badge-desc">ASIC tape-out experience</div></div>
+        <div class="badge-card locked"><span class="badge-icon">📡</span><div class="badge-name">RF Sorcerer</div><div class="badge-desc">mmWave design mastery</div></div>
+        <div class="badge-card locked"><span class="badge-icon">🚗</span><div class="badge-name">Autosar Driver</div><div class="badge-desc">Automotive standards</div></div>
+        <div class="badge-card locked"><span class="badge-icon">🛡️</span><div class="badge-name">Functional Safety</div><div class="badge-desc">IEC 61508 / ISO 26262</div></div>
+        <div class="badge-card locked"><span class="badge-icon">⚡</span><div class="badge-name">FPGA Timing God</div><div class="badge-desc">Closure on 500MHz+ designs</div></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+</div><!-- /root -->
+
+<!-- TOPIC DETAIL OVERLAY -->
+<div class="detail-overlay hidden" id="detail-overlay" onclick="closeDetail(event)">
+  <div class="detail-panel" id="detail-panel">
+    <button class="detail-close" onclick="closeDetail()">✕</button>
+    <div class="detail-topic-name" id="d-name">Topic Name</div>
+    <div class="detail-chips" id="d-chips"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">
+      <div>
+        <div class="detail-section-title">GLOBAL RARITY</div>
+        <div class="detail-percentile" id="d-percentile">—</div>
+        <div class="detail-percentile-sub" id="d-percentile-sub">—</div>
+      </div>
+      <div>
+        <div class="detail-section-title">SALARY IMPACT</div>
+        <div class="detail-percentile" id="d-salary" style="font-size:18px;margin-top:8px">—</div>
+        <div class="detail-percentile-sub" id="d-salary-sub">—</div>
+      </div>
+    </div>
+
+    <div class="detail-section-title">SCORE BREAKDOWN</div>
+    <div class="score-row" id="d-scores"></div>
+
+    <div class="detail-section-title">WHAT YOU'LL LEARN</div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.6" id="d-desc">—</div>
+
+    <div class="detail-section-title">RESOURCES</div>
+    <div class="detail-resources" id="d-resources"></div>
+
+    <button class="detail-mark-btn" id="d-markbtn" onclick="toggleTopic()"></button>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif">
+  <div class="notif-title" id="notif-title">+150 XP</div>
+  <div id="notif-body">Topic marked as learned!</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const TOPICS = {
+  ohm: {
+    name: 'Ohm\'s Law & Kirchhoff\'s Laws', level: 1, xp: 50,
+    chips: [{t:'LV 1 INTERN',c:'chip-blue'},{t:'FOUNDATION',c:'chip-green'},{t:'50 XP',c:'chip-gold'}],
+    percentile: '99.4%', percentile_sub: '99.4% of engineers know this — it\'s universal',
+    salary: '+0%', salary_sub: 'Baseline — required for all roles',
+    scores: [{l:'Difficulty',v:8,c:'#34d399'},{l:'Math Depth',v:5,c:'#38bdf8'},{l:'Industry Value',v:95,c:'#fbbf24'},{l:'Practicality',v:100,c:'#818cf8'}],
+    desc: 'The absolute foundation of electronics. V=IR, KVL and KCL. You must understand nodal analysis, mesh analysis, superposition, and Thevenin/Norton equivalents to analyze any circuit.',
+    resources: [{type:'BOOK',tc:'chip-blue',name:'The Art of Electronics — Horowitz & Hill'},{type:'COURSE',tc:'chip-purple',name:'MIT 6.002 Circuits and Electronics'},{type:'TOOL',tc:'chip-green',name:'LTspice (free circuit simulator)'}],
+    id: 'ohm'
+  },
+  components: {
+    name: 'Passive Components', level: 1, xp: 60,
+    chips: [{t:'LV 1 INTERN',c:'chip-blue'},{t:'HARDWARE',c:'chip-green'},{t:'60 XP',c:'chip-gold'}],
+    percentile: '96%', percentile_sub: 'Known by ~96% of practicing engineers',
+    salary: '+2%', salary_sub: 'Foundational hardware knowledge',
+    scores: [{l:'Difficulty',v:12,c:'#34d399'},{l:'Math Depth',v:15,c:'#38bdf8'},{l:'Industry Value',v:90,c:'#fbbf24'},{l:'Practicality',v:98,c:'#818cf8'}],
+    desc: 'Resistor tolerances, capacitor dielectrics (ceramic vs electrolytic vs film), inductor saturation, parasitics. How to read datasheets. Component selection criteria for temperature, voltage, current.',
+    resources: [{type:'BOOK',tc:'chip-blue',name:'Practical Electronics — Scherz & Monk'},{type:'TOOL',tc:'chip-green',name:'Mouser / DigiKey datasheet search'}],
+    id: 'components'
+  },
+  mcu_basics: {
+    name: 'Microcontroller Fundamentals', level: 1, xp: 80,
+    chips: [{t:'LV 1 INTERN',c:'chip-blue'},{t:'FIRMWARE',c:'chip-purple'},{t:'80 XP',c:'chip-gold'}],
+    percentile: '78%', percentile_sub: 'Known by ~78% of embedded engineers',
+    salary: '+8%', salary_sub: 'Core embedded engineering skill',
+    scores: [{l:'Difficulty',v:28,c:'#38bdf8'},{l:'Math Depth',v:10,c:'#38bdf8'},{l:'Industry Value',v:95,c:'#fbbf24'},{l:'Practicality',v:99,c:'#818cf8'}],
+    desc: 'GPIO configuration, timer/counter modes, interrupt vectors and NVIC, ADC/DAC, PWM generation. Understanding clock trees and peripheral buses (AHB/APB). STM32 HAL and LL drivers.',
+    resources: [{type:'MCU',tc:'chip-blue',name:'STM32 Reference Manual (RM0090)'},{type:'COURSE',tc:'chip-purple',name:'Fastbit Embedded C — Udemy'},{type:'TOOL',tc:'chip-green',name:'STM32CubeIDE / PlatformIO'}],
+    id: 'mcu_basics'
+  },
+  c_embedded: {
+    name: 'C for Embedded Systems', level: 1, xp: 90,
+    chips: [{t:'LV 1 INTERN',c:'chip-blue'},{t:'FIRMWARE',c:'chip-purple'},{t:'90 XP',c:'chip-gold'}],
+    percentile: '70%', percentile_sub: 'Known by ~70% of embedded developers',
+    salary: '+10%', salary_sub: 'Critical for all embedded roles',
+    scores: [{l:'Difficulty',v:35,c:'#38bdf8'},{l:'Math Depth',v:5,c:'#38bdf8'},{l:'Industry Value',v:98,c:'#fbbf24'},{l:'Practicality',v:100,c:'#818cf8'}],
+    desc: 'Volatile keyword for register access, bitfields and unions for peripheral registers, pointer arithmetic, function pointers for callbacks. Stack vs heap, memory sections (.text, .data, .bss). MISRA-C rules.',
+    resources: [{type:'BOOK',tc:'chip-blue',name:'Embedded C — Michael Barr'},{type:'STANDARD',tc:'chip-red',name:'MISRA-C:2012 guidelines'}],
+    id: 'c_embedded'
+  },
+  spi_i2c: {
+    name: 'SPI / I2C / UART Protocols', level: 2, xp: 110,
+    chips: [{t:'LV 2 JUNIOR',c:'chip-green'},{t:'PROTOCOLS',c:'chip-blue'},{t:'110 XP',c:'chip-gold'}],
+    percentile: '72%', percentile_sub: 'Breadth skill — ~72% of embedded engineers know this',
+    salary: '+12%', salary_sub: 'Essential for sensor integration work',
+    scores: [{l:'Difficulty',v:38,c:'#38bdf8'},{l:'Math Depth',v:8,c:'#38bdf8'},{l:'Industry Value',v:96,c:'#fbbf24'},{l:'Practicality',v:99,c:'#818cf8'}],
+    desc: 'SPI clock polarity/phase (CPOL/CPHA), chip select management, DMA-based transfers. I2C ACK/NAK, clock stretching, 10-bit addressing, multi-master arbitration. UART framing, baud rate calculation, RS-485/422.',
+    resources: [{type:'GUIDE',tc:'chip-blue',name:'Total Phase I2C/SPI Application Notes'},{type:'TOOL',tc:'chip-green',name:'Saleae Logic Analyzer + Logic 2 SW'}],
+    id: 'spi_i2c'
+  },
+  rtos_intro: {
+    name: 'RTOS Fundamentals', level: 2, xp: 150,
+    chips: [{t:'LV 2 JUNIOR',c:'chip-green'},{t:'RARE',c:'chip-red'},{t:'150 XP',c:'chip-gold'}],
+    percentile: '35%', percentile_sub: 'Only ~35% of embedded engineers have solid RTOS skills',
+    salary: '+18%', salary_sub: '$12–20k salary premium documented',
+    scores: [{l:'Difficulty',v:55,c:'#818cf8'},{l:'Math Depth',v:25,c:'#38bdf8'},{l:'Industry Value',v:90,c:'#fbbf24'},{l:'Practicality',v:95,c:'#818cf8'}],
+    desc: 'Task creation and priority, message queues and mailboxes, binary/counting semaphores, mutexes and priority inversion. FreeRTOS heap models (heap_1–5), stack overflow detection. Tick management and tickless idle.',
+    resources: [{type:'BOOK',tc:'chip-blue',name:'Using FreeRTOS Real Time Kernel — R. Barry'},{type:'DOCS',tc:'chip-purple',name:'FreeRTOS.org official documentation'},{type:'COURSE',tc:'chip-green',name:'FastBit RTOS Course (Udemy)'}],
+    id: 'rtos_intro'
+  },
+  power_basics: {
+    name: 'Power Supply Design Basics', level: 2, xp: 120,
+    chips: [{t:'LV 2 JUNIOR',c:'chip-green'},{t:'HARDWARE',c:'chip-blue'},{t:'120 XP',c:'chip-gold'}],
+    percentile: '48%', percentile_sub: '~48% understand power supply fundamentals',
+    salary: '+14%', salary_sub: 'Critical path to hardware design roles',
+    scores: [{l:'Difficulty',v:42,c:'#38bdf8'},{l:'Math Depth',v:30,c:'#38bdf8'},{l:'Industry Value',v:88,c:'#fbbf24'},{l:'Practicality',v:95,c:'#818cf8'}],
+    desc: 'LDO dropout voltage and thermal dissipation. Buck/boost/buck-boost topologies. Switching frequency tradeoffs. Output capacitor selection and ESR. Power sequencing for multi-rail systems. Decoupling strategy.',
+    resources: [{type:'BOOK',tc:'chip-blue',name:'Switch-Mode Power Supplies — Kazimierczuk'},{type:'TOOL',tc:'chip-green',name:'TI WEBENCH Power Designer'}],
+    id: 'power_basics'
+  },
+  dma: {
+    name: 'DMA & Memory Architecture', level: 3, xp: 180,
+    chips: [{t:'LV 3 MID',c:'chip-blue'},{t:'RARE',c:'chip-red'},{t:'180 XP',c:'chip-gold'}],
+    percentile: '28%', percentile_sub: 'Known by ~28% of embedded engineers',
+    salary: '+20%', salary_sub: 'Mid-to-senior differentiator',
+    scores: [{l:'Difficulty',v:60,c:'#818cf8'},{l:'Math Depth',v:20,c:'#38bdf8'},{l:'Industry Value',v:85,c:'#fbbf24'},{l:'Practicality',v:90,c:'#818cf8'}],
+    desc: 'DMA streams/channels, circular buffer mode, double-buffer mode, burst transfers. Cache coherency on Cortex-M7 (D-cache invalidate/clean). MPU region setup. Memory map and tight-coupling RAM on high-performance MCUs.',
+    resources: [{type:'REF',tc:'chip-blue',name:'ARM Cortex-M7 Processor TRM'},{type:'AN',tc:'chip-purple',name:'ST AN4838 — Cortex-M7 cache management'}],
+    id: 'dma'
+  },
+  bootloader: {
+    name: 'Bootloader Design', level: 3, xp: 200,
+    chips: [{t:'LV 3 MID',c:'chip-blue'},{t:'RARE',c:'chip-red'},{t:'200 XP',c:'chip-gold'}],
+    percentile: '18%', percentile_sub: 'Only ~18% of engineers can write bootloaders',
+    salary: '+22%', salary_sub: 'Strong Senior-level differentiator',
+    scores: [{l:'Difficulty',v:65,c:'#818cf8'},{l:'Math Depth',v:30,c:'#38bdf8'},{l:'Industry Value',v:88,c:'#fbbf24'},{l:'Practicality',v:85,c:'#818cf8'}],
+    desc: 'Startup assembly, vector table relocation, linker script memory regions. Flash programming algorithms. CRC-based firmware validation. Dual-bank OTA strategies. Secure boot with signature verification. Rollback protection.',
+    resources: [{type:'BOOK',tc:'chip-blue',name:'Embedded Systems Firmware Demystified — Ed Lansdown'},{type:'TOOL',tc:'chip-green',name:'MCUBoot open-source bootloader'}],
+    id: 'bootloader'
+  },
+  analog_design: {
+    name: 'Analog Front-End Design', level: 3, xp: 220,
+    chips: [{t:'LV 3 MID',c:'chip-blue'},{t:'RARE',c:'chip-red'},{t:'220 XP',c:'chip-gold'}],
+    percentile: '18%', percentile_sub: 'Only ~18% of engineers master AFE design',
+    salary: '+28%', salary_sub: 'Premium skill — medical/industrial demand',
+    scores: [{l:'Difficulty',v:70,c:'#fbbf24'},{l:'Math Depth',v:60,c:'#38bdf8'},{l:'Industry Value',v:92,c:'#fbbf24'},{l:'Practicality',v:90,c:'#818cf8'}],
+    desc: 'Instrumentation amplifier topology, CMRR budget, input impedance matching. ADC driver design: antialiasing filter, reference buffering, input range mapping. Noise budget: Johnson noise, flicker noise, input current noise. SNR calculation.',
+    resources: [{type:'BOOK',tc:'chip-blue',name:'Op Amp Applications Handbook — Walt Jung (ADI)'},{type:'BOOK',tc:'chip-purple',name:'Data Conversion Handbook — ADI'},{type:'TOOL',tc:'chip-green',name:'ADI LTspice + ADI circuit library'}],
+    id: 'analog_design'
+  },
+  rtos_kernel: {
+    name: 'RTOS Kernel Internals', level: 4, xp: 280,
+    chips: [{t:'LV 4 SENIOR',c:'chip-purple'},{t:'ELITE',c:'chip-red'},{t:'280 XP',c:'chip-gold'}],
+    percentile: '4.2%', percentile_sub: 'Only 4.2% of embedded engineers know this depth',
+    salary: '+35%', salary_sub: '+$25–45k documented salary impact',
+    scores: [{l:'Difficulty',v:78,c:'#f472b6'},{l:'Math Depth',v:45,c:'#38bdf8'},{l:'Industry Value',v:88,c:'#fbbf24'},{l:'Practicality',v:80,c:'#818cf8'}],
+    desc: 'Preemptive scheduler implementation: ready list, blocked list, tick handler. Context switching: stack frame layout, PendSV ISR on ARM Cortex-M. Tickless idle and low-power modes. Porting to new MCU architectures. Writing an RTOS from scratch.',
+    resources: [{type:'BOOK',tc:'chip-blue',name:'MicroC/OS-II — Jean Labrosse'},{type:'CODE',tc:'chip-green',name:'FreeRTOS source code (GitHub)'},{type:'COURSE',tc:'chip-purple',name:'RTOS from Scratch — FastBit'}],
+    id: 'rtos_kernel'
+  },
+  mixed_signal: {
+    name: 'Mixed-Signal IC Design', level: 4, xp: 320,
+    chips: [{t:'LV 4 SENIOR',c:'chip-purple'},{t:'ELITE',c:'chip-red'},{t:'320 XP',c:'chip-gold'},{t:'ADI TARGET',c:'chip-blue'}],
+    percentile: '2.5%', percentile_sub: 'Only 2.5% of engineers have IC-level mixed-signal skills',
+    salary: '+55%', salary_sub: 'Top-tier IC design role premium',
+    scores: [{l:'Difficulty',v:88,c:'#f87171'},{l:'Math Depth',v:85,c:'#38bdf8'},{l:'Industry Value',v:95,c:'#fbbf24'},{l:'Practicality',v:70,c:'#818cf8'}],
+    desc: 'Transistor-level design in Cadence Virtuoso/Spectre. PVT (process-voltage-temperature) corner analysis. Device mismatch and Monte Carlo simulation. Phase margin and stability in feedback amplifiers. Layout parasitic extraction. OTA, comparator, bandgap reference design. This is your ADI Staff Engineer target skill.',
+    resources: [{type:'BOOK',tc:'chip-blue',name:'Design of Analog CMOS Integrated Circuits — Razavi'},{type:'COURSE',tc:'chip-purple',name:'UCLA ECE215C (Razavi, free on YouTube)'},{type:'TOOL',tc:'chip-green',name:'Xschem + ngspice + SkyWater 130nm PDK (free)'}],
+    id: 'mixed_signal'
+  },
+  hv_design: {
+    name: 'High-Voltage Design (≥1kV)', level: 4, xp: 380,
+    chips: [{t:'LV 4 SENIOR',c:'chip-purple'},{t:'ELITE ★',c:'chip-red'},{t:'380 XP',c:'chip-gold'},{t:'YOUR EDGE',c:'chip-green'}],
+    percentile: '98.2%', percentile_sub: 'You know more than 98.2% of embedded engineers in this area',
+    salary: '+45%', salary_sub: 'Industrial/medical HV roles command major premium',
+    scores: [{l:'Difficulty',v:90,c:'#f87171'},{l:'Math Depth',v:70,c:'#38bdf8'},{l:'Industry Value',v:90,c:'#fbbf24'},{l:'Practicality',v:85,c:'#818cf8'}],
+    desc: '✦ YOUR STRONGEST DIFFERENTIATOR ✦ IEC 60950/62368 creepage and clearance rules. HiPot / dielectric withstand test methodology. Partial discharge measurement. Reinforced vs functional vs basic insulation. Capacitive coupling at 10kV+. Transformer design for isolated topologies. This is elite territory — only ~1.8% of embedded engineers operate here.',
+    resources: [{type:'STANDARD',tc:'chip-red',name:'IEC 62368-1 Audio/Video Equipment'},{type:'STANDARD',tc:'chip-red',name:'IEC 60601-1 Medical Electrical Equipment'},{type:'BOOK',tc:'chip-blue',name:'High Voltage Engineering — Kuffel & Zaengl'}],
+    id: 'hv_design'
+  },
+  timing_closure: {
+    name: 'FPGA Timing Closure', level: 5, xp: 420,
+    chips: [{t:'LV 5 LEAD',c:'chip-gold'},{t:'ELITE',c:'chip-red'},{t:'420 XP',c:'chip-gold'}],
+    percentile: '3.1%', percentile_sub: 'Only 3.1% of engineers master FPGA timing closure',
+    salary: '+48%', salary_sub: 'FPGA lead roles highly compensated',
+    scores: [{l:'Difficulty',v:92,c:'#f87171'},{l:'Math Depth',v:65,c:'#38bdf8'},{l:'Industry Value',v:88,c:'#fbbf24'},{l:'Practicality',v:75,c:'#818cf8'}],
+    desc: 'Static timing analysis: setup/hold slack, clock domain crossing, false paths, multi-cycle paths. Floorplanning and placement constraints in Vivado/Quartus. Pipelining strategies for high-frequency designs. MMCM/PLL configuration. I/O timing constraints (output_delay, input_delay).',
+    resources: [{type:'BOOK',tc:'chip-blue',name:'FPGA Prototyping by VHDL Examples — Pong Chu'},{type:'TOOL',tc:'chip-green',name:'Xilinx Vivado Timing Analyzer'},{type:'COURSE',tc:'chip-purple',name:'Intel FPGA Training — Timing Closure'}],
+    id: 'timing_closure'
+  },
+  ddr_si: {
+    name: 'DDR Signal Integrity', level: 5, xp: 500,
+    chips: [{t:'LV 5 LEAD',c:'chip-gold'},{t:'ELITE ★★',c:'chip-red'},{t:'500 XP',c:'chip-gold'}],
+    percentile: '1.3%', percentile_sub: 'Only 1.3% of embedded engineers understand DDR SI',
+    salary: '+60%', salary_sub: 'Highest-paying embedded hardware sub-specialty',
+    scores: [{l:'Difficulty',v:96,c:'#f87171'},{l:'Math Depth',v:80,c:'#38bdf8'},{l:'Industry Value',v:92,c:'#fbbf24'},{l:'Practicality',v:70,c:'#818cf8'}],
+    desc: 'Differential pair routing, impedance control (85Ω diff, 40Ω single-ended). Eye diagram analysis and mask compliance. JEDEC DDR4/LPDDR4 topology requirements. Via stub treatment, back-drilling. IBIS model-based pre/post-layout simulation in HyperLynx. BGA fanout strategies for high-speed memory.',
+    resources: [{type:'TOOL',tc:'chip-green',name:'Mentor HyperLynx SI Simulator'},{type:'BOOK',tc:'chip-blue',name:'Signal and Power Integrity — Eric Bogatin'},{type:'STANDARD',tc:'chip-red',name:'JEDEC DDR4 JESD79-4 Standard'}],
+    id: 'ddr_si'
+  },
+  asic_flow: {
+    name: 'Full ASIC Design Flow', level: 6, xp: 600,
+    chips: [{t:'LV 6 STAFF',c:'chip-purple'},{t:'ELITE ★★★',c:'chip-red'},{t:'600 XP',c:'chip-gold'}],
+    percentile: '0.8%', percentile_sub: 'Less than 1% of engineers have full ASIC flow experience',
+    salary: '+80%', salary_sub: 'IC design roles at ADI, TI, Qualcomm premium',
+    scores: [{l:'Difficulty',v:99,c:'#f87171'},{l:'Math Depth',v:90,c:'#38bdf8'},{l:'Industry Value',v:98,c:'#fbbf24'},{l:'Practicality',v:60,c:'#818cf8'}],
+    desc: 'RTL design in SystemVerilog, synthesis with Synopsys Design Compiler, floorplanning, place-and-route with Cadence Innovus. Static timing signoff, DRC/LVS with Mentor Calibre. Physical verification and tape-out checklist. PDK setup and standard cell library selection.',
+    resources: [{type:'TOOL',tc:'chip-green',name:'OpenROAD (free ASIC flow)'},{type:'BOOK',tc:'chip-blue',name:'Static Timing Analysis for Nanometer Designs'},{type:'PDK',tc:'chip-purple',name:'SkyWater 130nm Open PDK'}],
+    id: 'asic_flow'
+  },
+  node_physics: {
+    name: 'Sub-7nm Process Physics', level: 7, xp: 800,
+    chips: [{t:'LV 7 DISTINGUISHED',c:'chip-red'},{t:'LEGENDARY',c:'chip-red'},{t:'800 XP',c:'chip-gold'}],
+    percentile: '0.1%', percentile_sub: 'Top 0.1% — research-level knowledge',
+    salary: '+120%', salary_sub: 'Director-level / Principal Scientist territory',
+    scores: [{l:'Difficulty',v:100,c:'#f87171'},{l:'Math Depth',v:99,c:'#38bdf8'},{l:'Industry Value',v:99,c:'#fbbf24'},{l:'Practicality',v:40,c:'#818cf8'}],
+    desc: 'FinFET vs GAA (Gate-All-Around) transistor physics. Quantum tunneling leakage at sub-5nm. EUV lithography patterning constraints. DTCO (Design-Technology Co-Optimization). SRAM bit cell stability at advanced nodes. Electromigration and IR drop at scaled metallization.',
+    resources: [{type:'PAPER',tc:'chip-red',name:'IEDM Conference Proceedings (annual)'},{type:'BOOK',tc:'chip-blue',name:'Physics of Semiconductor Devices — Sze'},{type:'ORG',tc:'chip-green',name:'imec Technology Review publications'}],
+    id: 'node_physics'
+  }
+};
+
+let currentTopic = null;
+let learnedTopics = new Set(['ohm','components','mcu_basics','spi_i2c','dma','hv_design']);
+let totalXP = 4820;
+
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('view-'+v);
+  if(el) el.classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  btns.forEach(b => { if(b.textContent.toLowerCase().includes(v.toLowerCase().slice(0,4))) b.classList.add('active'); });
+  if(v==='stats') setTimeout(initCharts,100);
+}
+
+function selectBranch(b) {
+  document.querySelectorAll('.branch-btn').forEach(el=>el.classList.remove('active'));
+  const bname = {
+    embedded:'Embedded Systems Engineering', firmware:'Firmware Engineering',
+    pcb:'PCB Design', analog:'Analog Electronics', digital:'Digital Electronics',
+    power:'Power Electronics', rf:'RF Engineering', fpga:'FPGA Engineering',
+    asic:'ASIC Design', dsp:'Signal Processing', rtos:'Real-Time Systems',
+    iot:'IoT Engineering', linux:'Embedded Linux', auto:'Automotive Embedded',
+    medical:'Medical Electronics', wearable:'Wearable Electronics',
+    bms:'Battery Management Systems', emc:'EMC/EMI Engineering',
+    safety:'Functional Safety', edgeai:'Edge AI Systems'
+  };
+  const bicon = {
+    embedded:'⚙️',firmware:'💾',pcb:'🔧',analog:'📡',digital:'🔌',power:'⚡',
+    rf:'📶',fpga:'🖥️',asic:'🔬',dsp:'🌊',rtos:'⏱️',iot:'🌐',linux:'🐧',
+    auto:'🚗',medical:'🏥',wearable:'⌚',bms:'🔋',emc:'🛡️',safety:'🔒',edgeai:'🤖'
+  };
+  document.getElementById('roadmap-title').textContent = bname[b]||'Engineering Roadmap';
+  document.getElementById('roadmap-icon').textContent = bicon[b]||'⚙️';
+  const allBtns = document.querySelectorAll('.branch-btn');
+  allBtns.forEach(btn => { if(btn.textContent.toLowerCase().includes(b.toLowerCase().slice(0,4))) btn.classList.add('active'); });
+}
+
+function toggleBand(n) {
+  const band = document.getElementById('band-'+n);
+  band.classList.toggle('open');
+}
+
+function openTopic(id) {
+  const t = TOPICS[id]; if(!t) return;
+  currentTopic = id;
+  document.getElementById('d-name').textContent = t.name;
+  
+  const chipsEl = document.getElementById('d-chips');
+  chipsEl.innerHTML = t.chips.map(c=>`<span class="chip ${c.c}">${c.t}</span>`).join('');
+  
+  document.getElementById('d-percentile').textContent = t.percentile;
+  document.getElementById('d-percentile-sub').textContent = t.percentile_sub;
+  document.getElementById('d-salary').textContent = t.salary;
+  document.getElementById('d-salary-sub').textContent = t.salary_sub;
+  document.getElementById('d-desc').textContent = t.desc;
+  
+  const scoresEl = document.getElementById('d-scores');
+  const scoreColors = {Difficulty:'#f87171',Math_Depth:'#38bdf8',Industry_Value:'#fbbf24',Practicality:'#818cf8'};
+  scoresEl.innerHTML = t.scores.map(s=>`
+    <div class="score-item">
+      <div class="score-item-label">${s.l}</div>
+      <div class="score-item-bar"><div class="score-item-fill" style="width:${s.v}%;background:${s.c}"></div></div>
+      <div class="score-item-val" style="color:${s.c}">${s.v}/100</div>
+    </div>`).join('');
+  
+  const resEl = document.getElementById('d-resources');
+  resEl.innerHTML = t.resources.map(r=>`
+    <div class="resource-item">
+      <span class="resource-type chip ${r.tc}">${r.type}</span>
+      <span class="resource-name">${r.name}</span>
+    </div>`).join('');
+  
+  const learned = learnedTopics.has(id);
+  const btn = document.getElementById('d-markbtn');
+  btn.textContent = learned ? '✓ Learned — Click to unmark' : '+ Mark as Learned';
+  btn.className = 'detail-mark-btn ' + (learned ? 'unmark' : 'mark');
+  
+  document.getElementById('detail-overlay').classList.remove('hidden');
+}
+
+function closeDetail(e) {
+  if(!e || e.target === document.getElementById('detail-overlay') || !e.target) {
+    document.getElementById('detail-overlay').classList.add('hidden');
+  }
+}
+
+function toggleTopic() {
+  if(!currentTopic) return;
+  const t = TOPICS[currentTopic];
+  const chk = document.getElementById('chk-'+currentTopic);
+  
+  if(learnedTopics.has(currentTopic)) {
+    learnedTopics.delete(currentTopic);
+    totalXP -= t.xp;
+    if(chk) { chk.classList.remove('done'); chk.textContent = ''; }
+    showNotif('-'+t.xp+' XP', 'Topic unmarked');
+    document.getElementById('d-markbtn').textContent = '+ Mark as Learned';
+    document.getElementById('d-markbtn').className = 'detail-mark-btn mark';
+  } else {
+    learnedTopics.add(currentTopic);
+    totalXP += t.xp;
+    if(chk) { chk.classList.add('done'); chk.textContent = '✓'; }
+    showNotif('+'+t.xp+' XP', '🎯 '+t.name+' mastered!');
+    document.getElementById('d-markbtn').textContent = '✓ Learned — Click to unmark';
+    document.getElementById('d-markbtn').className = 'detail-mark-btn unmark';
+  }
+  
+  document.querySelector('.xp-pill').textContent = '⚡ '+totalXP.toLocaleString()+' XP';
+}
+
+function showNotif(title, body) {
+  const n = document.getElementById('notif');
+  document.getElementById('notif-title').textContent = title;
+  document.getElementById('notif-body').textContent = body;
+  n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'), 2800);
+}
+
+let chartsInited = false;
+function initCharts() {
+  if(chartsInited) return;
+  chartsInited = true;
+  
+  const rc = document.getElementById('radarChart');
+  if(rc) {
+    new Chart(rc, {
+      type: 'radar',
+      data: {
+        labels: ['Firmware','Analog/Mixed','PCB Design','Power','Protocols','Medical HW'],
+        datasets: [{
+          label: 'Your Skills',
+          data: [62, 55, 72, 40, 85, 65],
+          borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.15)',
+          borderWidth: 2, pointBackgroundColor: '#38bdf8', pointRadius: 4
+        },{
+          label: 'Global Avg',
+          data: [35, 20, 40, 28, 55, 15],
+          borderColor: '#475569', backgroundColor: 'rgba(71,85,105,0.08)',
+          borderWidth: 1, pointBackgroundColor: '#475569', pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          r: {
+            backgroundColor: 'transparent',
+            grid: { color: 'rgba(99,179,237,0.1)' },
+            angleLines: { color: 'rgba(99,179,237,0.1)' },
+            ticks: { display: false },
+            pointLabels: { color: '#94a3b8', font: { size: 10, family: "'DM Sans',sans-serif" } }
+          }
+        }
+      }
+    });
+  }
+  
+  const xc = document.getElementById('xpChart');
+  if(xc) {
+    new Chart(xc, {
+      type: 'line',
+      data: {
+        labels: ['Dec','Jan','Feb','Mar','Apr','May'],
+        datasets: [{
+          data: [1200, 1800, 2400, 3200, 4100, 4820],
+          borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.06)',
+          borderWidth: 2, tension: 0.4, fill: true,
+          pointBackgroundColor: '#34d399', pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(99,179,237,0.08)' }, ticks: { color: '#64748b', font: { size: 10 } } },
+          y: { grid: { color: 'rgba(99,179,237,0.08)' }, ticks: { color: '#64748b', font: { size: 10 }, callback: v => v.toLocaleString() } }
+        }
+      }
+    });
+  }
+}
+
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDetail(); });
+</script>
+</body>
+</html>
